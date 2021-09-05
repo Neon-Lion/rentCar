@@ -1,0 +1,19 @@
+#addCarForm,
+.hidden,
+#deleteCarForm {
+    margin: 80px 0px 20px 0px;
+    display: none;
+}
+
+.actionButtons {
+    float: right;
+    margin: 20px 0px 20px 20px;
+}
+
+.cancelActionButton {
+    margin-left: 20px;
+}
+
+.alert {
+    margin-top: 70px;
+}

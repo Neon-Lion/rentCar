@@ -1,0 +1,165 @@
+{% extends 'base.html.twig' %}
+
+{# {% block title %}Hello HomeController!{% endblock %} #}
+{% block title %}Rent Car List - Homepage{% endblock %}
+
+{% block stylesheets %}
+    {# CSS #}
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/homepage.css') }}">
+    {# JS #}
+    <script type="text/javascript" src="{{ asset('js/jquery.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/popper.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/bootstrap.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/filterTable.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/hideShowElements.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+<div class="example-wrapper">
+    {# <h1>Hello {{ controller_name }}! ✅</h1> #}
+    <h1 style="text-align:center;">Rent Car List</h1>
+
+    {# This friendly message is coming from:
+    <ul>
+        <li>Your controller at <code><a href="{{ 'C:/Apache24/htdocs/rentCar/src/Controller/HomeController.php'|file_link(0) }}">src/Controller/HomeController.php</a></code></li>
+        <li>Your template at <code><a href="{{ 'C:/Apache24/htdocs/rentCar/templates/main/index.html.twig'|file_link(0) }}">templates/main/index.html.twig</a></code></li>
+    </ul> #}
+    <div class="dropdown">        
+        {# Filter by brand #}
+        <select class="form-control" id="carsBrandDropdown" onchange="filterTableByBrand()">
+            <option value="" selected disabled>Choose brand</option>
+            {% for brand in brands %}
+                <option class="dropdown-item">{{brand}}</option>
+            {% endfor %} #}
+        </select>
+        {# Filter by manufacturer #}
+        <select class="form-control" id="carsManufacturerDropdown" onchange="filterTableByManufacturer()">
+            <option value="" selected disabled>Choose manufacturer</option>
+            {% for manufacturer in manufacturers %}
+                <option class="dropdown-item">{{manufacturer}}</option>
+            {% endfor %} #}
+        </select>
+        {# Filter by year #}
+        <select class="form-control" id="carsYearDropdown" onchange="filterTableByYear()">
+            <option value="" selected disabled>Choose year</option>
+            {% for year in years %}
+                <option class="dropdown-item">{{year}}</option>
+            {% endfor %} #}
+        </select>
+  </div>
+  
+    {# Button to show adding form #}
+    <button class="btn btn-primary actionButtons" type="button" onclick="showElement('deleteCarForm');" value="Delete car">Delete car</button>
+    <button class="btn btn-primary actionButtons" type="button" onclick="showElement('addCarForm');" value="Add car">Add car</button>
+
+    {# Form for adding car #}
+    <div id="addCarForm">
+        {{form_start(addForm_data)}}
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    {{form_row(addForm_data.brand)}}
+                </div>
+                <div class="form-group col-md-6">
+                    {{form_row(addForm_data.model)}}
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    {{form_row(addForm_data.manufacturer)}}
+                </div>
+                <div class="form-group col-md-6">
+                    {{form_row(addForm_data.year)}}
+                </div>
+            </div>
+            <div class="form-row actionButtons">
+                <div class="form-group col-md-6">
+                    {{form_row(addForm_data.Add)}}
+                </div>
+                <div class="form-group col-md-4 cancelActionButton" onclick="hideElement('addCarForm');">
+                    {{form_row(addForm_data.Cancel)}}
+                </div>
+            </div>
+        {{form_end(addForm_data)}}
+    </div>
+    {# End adding form #}
+    
+    {# Form for deleting car #}
+    <div id="deleteCarForm">
+        {{form_start(deleteForm_data)}}
+            <div class="form-group">
+                <select class="form-control" name="deletedCar">
+                    <option value="" selected disabled>Choose car to delete</option>
+                    {% set year = "" %}
+                    {% for car in cars %}
+                        {% if (year == car.year )  %}
+                            {% set continue = true %}
+                        {% else %}
+                            <option class="dropdown-item" value="{{car.id}}">{{car.brand ~ ' ' ~ car.model ~ ' ' ~ car.manufacturer ~ ' ' ~ car.year}}</option>
+                        {% endif %}
+                        {% set year = car.year %}
+                    {% endfor %}
+                </select>
+                <div class="form-row actionButtons">
+                    <div class="form-group col-md-6">
+                        {{form_row(deleteForm_data.Delete)}}
+                    </div>
+                    <div class="form-group col-md-4 cancelActionButton" onclick="hideElement('deleteCarForm');">
+                        {{form_row(deleteForm_data.Cancel)}}
+                    </div>
+                </div>
+            </div>
+        {{form_end(deleteForm_data)}}
+    </div>
+    {# End deleting form #}
+
+    {% for successAlert in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ successAlert }}
+        </div>
+    {% endfor %}
+    {# Table with all cars #}
+    <table class="table table-hover" id="cars">
+        <thead>
+            <tr>
+                {# <th scope="col">#</th> #}
+                <th scope="col">Brand</th>
+                <th scope="col">Model</th>
+                <th scope="col">Manufacturer</th>
+                <th scope="col">Year</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for car in cars %}
+                    <tr id="car{{car.id}}Info">
+                        {# <th scope="row">{{car.id}}</th> #}
+                        <td>{{car.brand}}</td>
+                        <td>{{car.model}}</td>
+                        <td>{{car.manufacturer}}</td>
+                        <td>{{car.year}}</td>
+                        <td>
+                            <button class="btn btn-primary" type="button" onclick="showElement('editCarForm{{car.id}}'); hideElement('car{{car.id}}Info')" value="Edit car">Show Edit Fields</button>
+                        </td>
+                    </tr>
+                    <form action="home/edit/{{car.id}}" method="post">
+                        <tr id="editCarForm{{car.id}}" class="hidden">
+                            {# <th scope="row">{{car.id}}</th> #}
+                            <td><input type="text" name="brand"        value={{car.brand}}></td>
+                            <td><input type="text" name="model"        value={{car.model}}></td>
+                            <td><input type="text" name="manufacturer" value={{car.manufacturer}}></td>
+                            <td><input type="text" name="year"         value={{car.year}}></td>
+                            <td>
+                                <button class="btn btn-primary" type="submit" id="editCar{{car.id}}" name="editCar{{car.id}}" value="Edit car">Edit</button>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary" type="button" id="cancel{{car.id}}" name="cancel{{car.id}}" value="Cancel" onclick="showElement('car{{car.id}}Info'); hideElement('editCarForm{{car.id}}')">Cancel</button>
+                            </td>
+                        </tr>
+                    </form>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
