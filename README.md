@@ -23,7 +23,7 @@ This is a simple project of cars list using Symfony in which you can add, edit a
 To start the project:
 - Download and install <code>Composer</code>: https://getcomposer.org/download/;
 - Set <code>composer.bat</code> file to the PATH system variables;
-- Type this in console terminal:
+- Type this in console terminal of the project folder:
 ```
 composer install
 ```
